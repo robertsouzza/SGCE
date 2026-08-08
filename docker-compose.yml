@@ -1,0 +1,92 @@
+# ============================================================
+# SGCE — docker-compose.yml (skill 00: infraestrutura base)
+# ============================================================
+# Serviços de infraestrutura para desenvolvimento local.
+# Backend e frontend serão adicionados nas skills 01 e 07/10.
+#
+# Portas exportadas ao host podem ser sobrescritas via .env
+# (útil se você já tem outro Postgres/Redis/MinIO rodando):
+#   SGCE_POSTGRES_PORT=5433
+#   SGCE_REDIS_PORT=6380
+#   SGCE_MINIO_API_PORT=9010
+#   SGCE_MINIO_CONSOLE_PORT=9011
+#
+# Segredos (POSTGRES_PASSWORD, MINIO_ROOT_PASSWORD) estão em
+# valores DEV. Skill 10 vai extrair para .env / secret manager
+# antes de qualquer uso real.
+# ============================================================
+
+services:
+  postgres:
+    image: postgis/postgis:16-3.4
+    container_name: sgce-postgres
+    environment:
+      POSTGRES_USER: sgce
+      POSTGRES_PASSWORD: sgce_dev
+      POSTGRES_DB: sgce
+      TZ: UTC
+      PGTZ: UTC
+    ports:
+      - "${SGCE_POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - sgce_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sgce -d sgce"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: sgce-redis
+    ports:
+      - "${SGCE_REDIS_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  minio:
+    # TODO(skill-10): pinar tag específica de release (não usar :latest em prod).
+    image: minio/minio:latest
+    container_name: sgce-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "${SGCE_MINIO_API_PORT:-9000}:9000"
+      - "${SGCE_MINIO_CONSOLE_PORT:-9001}:9001"
+    volumes:
+      - sgce_miniodata:/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://127.0.0.1:9000/minio/health/live || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+    restart: unless-stopped
+
+  minio-init:
+    image: minio/mc:latest
+    container_name: sgce-minio-init
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      until mc alias set local http://minio:9000 minioadmin minioadmin >/dev/null 2>&1; do
+        echo 'Aguardando MinIO subir...'; sleep 2;
+      done;
+      mc mb --ignore-existing local/sgce-uploads;
+      mc anonymous set none local/sgce-uploads;
+      echo 'Bucket sgce-uploads pronto.';
+      "
+    restart: "no"
+
+volumes:
+  sgce_pgdata:
+  sgce_miniodata:

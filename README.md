@@ -25,21 +25,31 @@ O sistema é gerado em **11 passos verificáveis** (uma skill Claude Code por pa
 
 ### Roadmap de geração
 
-| # | Skill | O que produz |
-|---|---|---|
-| 00 | [sgce-00-infra-base](skills/sgce-00-infra-base/SKILL.md) | Monorepo + `docker-compose.yml` de infraestrutura (Postgres+PostGIS, Redis, MinIO) |
-| 01 | [sgce-01-backend-core](skills/sgce-01-backend-core/SKILL.md) | Spring Boot + módulos `shared` (RLS, CORS, OpenAPI, S3), `autenticacao` (JWT em cookie httpOnly + CSRF), `auditoria` + ArchUnit |
-| 02 | [sgce-02-modulo-partido-equipe](skills/sgce-02-modulo-partido-equipe/SKILL.md) | Partido, Candidato, Equipe, MembroEquipe, EquipeCandidato |
-| 03 | [sgce-03-modulo-financeiro](skills/sgce-03-modulo-financeiro/SKILL.md) | Recurso, Despesa, PagamentoEquipe, fluxo de aprovação, relatório PDF/JSON |
-| 04 | [sgce-04-modulo-eleitores](skills/sgce-04-modulo-eleitores/SKILL.md) | Eleitor, Abordagem, IntencaoVoto, RegiaoEleitoral + endpoint de sincronização offline |
-| 05 | [sgce-05-modulo-consentimento](skills/sgce-05-modulo-consentimento/SKILL.md) | ConsentimentoLGPD + anonimização + deep-link `wa.me` + stub WhatsApp |
-| 06 | [sgce-06-modulo-tempo-real-superadmin](skills/sgce-06-modulo-tempo-real-superadmin/SKILL.md) | WebSocket/Redis + break-glass dual-control do Super Admin |
-| 07 | [sgce-07-frontend-core-gestao](skills/sgce-07-frontend-core-gestao/SKILL.md) | Angular PWA + core (auth/realtime/offline) + features de gestão |
-| 08 | [sgce-08-frontend-campo-dashboard](skills/sgce-08-frontend-campo-dashboard/SKILL.md) | Eleitores (offline-first) + mapa hierárquico + dashboard tempo real |
-| 09 | [sgce-09-testes-integracao-e2e](skills/sgce-09-testes-integracao-e2e/SKILL.md) | Testcontainers + Playwright + teste dedicado de isolamento multi-tenant |
-| 10 | [sgce-10-deploy-cicd](skills/sgce-10-deploy-cicd/SKILL.md) | Dockerfiles finais + `docker-compose.yml` unificado + GitHub Actions + README final |
+| # | Skill | Status | O que produz |
+|---|---|---|---|
+| 00 | [sgce-00-infra-base](skills/sgce-00-infra-base/SKILL.md) | ✅ concluída | Monorepo + `docker-compose.yml` de infraestrutura (Postgres+PostGIS, Redis, MinIO) |
+| 01 | [sgce-01-backend-core](skills/sgce-01-backend-core/SKILL.md) | ⏳ pendente | Spring Boot + módulos `shared` (RLS, CORS, OpenAPI, S3), `autenticacao` (JWT em cookie httpOnly + CSRF), `auditoria` + ArchUnit |
+| 02 | [sgce-02-modulo-partido-equipe](skills/sgce-02-modulo-partido-equipe/SKILL.md) | ⏳ pendente | Partido, Candidato, Equipe, MembroEquipe, EquipeCandidato |
+| 03 | [sgce-03-modulo-financeiro](skills/sgce-03-modulo-financeiro/SKILL.md) | ⏳ pendente | Recurso, Despesa, PagamentoEquipe, fluxo de aprovação, relatório PDF/JSON |
+| 04 | [sgce-04-modulo-eleitores](skills/sgce-04-modulo-eleitores/SKILL.md) | ⏳ pendente | Eleitor, Abordagem, IntencaoVoto, RegiaoEleitoral + endpoint de sincronização offline |
+| 05 | [sgce-05-modulo-consentimento](skills/sgce-05-modulo-consentimento/SKILL.md) | ⏳ pendente | ConsentimentoLGPD + anonimização + deep-link `wa.me` + stub WhatsApp |
+| 06 | [sgce-06-modulo-tempo-real-superadmin](skills/sgce-06-modulo-tempo-real-superadmin/SKILL.md) | ⏳ pendente | WebSocket/Redis + break-glass dual-control do Super Admin |
+| 07 | [sgce-07-frontend-core-gestao](skills/sgce-07-frontend-core-gestao/SKILL.md) | ⏳ pendente | Angular PWA + core (auth/realtime/offline) + features de gestão |
+| 08 | [sgce-08-frontend-campo-dashboard](skills/sgce-08-frontend-campo-dashboard/SKILL.md) | ⏳ pendente | Eleitores (offline-first) + mapa hierárquico + dashboard tempo real |
+| 09 | [sgce-09-testes-integracao-e2e](skills/sgce-09-testes-integracao-e2e/SKILL.md) | ⏳ pendente | Testcontainers + Playwright + teste dedicado de isolamento multi-tenant |
+| 10 | [sgce-10-deploy-cicd](skills/sgce-10-deploy-cicd/SKILL.md) | ⏳ pendente | Dockerfiles finais + `docker-compose.yml` unificado + GitHub Actions + README final |
 
 Cada skill tem bloco `Assume:` explícito com o que a anterior entrega. Pular skills quebra o DoD da seguinte.
+
+**Subir só a infraestrutura (após skill 00):**
+
+```bash
+docker compose up -d postgres redis minio minio-init
+# Postgres:  localhost:5432 (ou SGCE_POSTGRES_PORT do seu .env)
+# Redis:     localhost:6379
+# MinIO API: http://localhost:9000
+# MinIO UI:  http://localhost:9001 (minioadmin / minioadmin)
+```
 
 ## Stack técnica
 
