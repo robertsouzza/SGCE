@@ -5,8 +5,10 @@ spring:
     active: ${SPRING_PROFILES_ACTIVE:dev}
   datasource:
     url: ${SGCE_DB_URL:jdbc:postgresql://localhost:5433/sgce}
-    username: ${SGCE_DB_USER:sgce}
-    password: ${SGCE_DB_PASSWORD:sgce_dev}
+    # Runtime usa sgce_app (sem SUPERUSER/BYPASSRLS) para RLS valer de fato.
+    # Migrations Flyway rodam como sgce (owner) via spring.flyway.* abaixo.
+    username: ${SGCE_DB_USER:sgce_app}
+    password: ${SGCE_DB_PASSWORD:sgce_app_dev}
     hikari:
       auto-commit: false
   jpa:
@@ -23,6 +25,9 @@ spring:
     enabled: true
     locations: classpath:db/migration
     baseline-on-migrate: true
+    # Flyway roda com o usuário owner (superuser), o backend em runtime usa sgce_app.
+    user: ${SGCE_DB_ADMIN_USER:sgce}
+    password: ${SGCE_DB_ADMIN_PASSWORD:sgce_dev}
   jackson:
     default-property-inclusion: non_null
     serialization:
@@ -81,6 +86,11 @@ spring:
       on-profile: docker
   datasource:
     url: jdbc:postgresql://postgres:5432/sgce
+    username: sgce_app
+    password: sgce_app_dev
+  flyway:
+    user: sgce
+    password: sgce_dev
 
 sgce:
   s3:

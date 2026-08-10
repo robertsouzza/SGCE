@@ -26,25 +26,20 @@ public class TenantAwareTransactionAspect {
     @PersistenceContext
     private EntityManager entityManager;
 
-    @Around("@within(org.springframework.transaction.annotation.Transactional) " +
-            "|| @annotation(org.springframework.transaction.annotation.Transactional)")
+    @Around("execution(* com.campanha..application.service..*(..))")
     public Object applyTenantOnTransaction(ProceedingJoinPoint pjp) throws Throwable {
-        if (!TransactionSynchronizationManager.isActualTransactionActive()) {
+        boolean txActive = TransactionSynchronizationManager.isActualTransactionActive();
+        Long tenantId = TenantContext.get();
+        log.debug("TenantAware: método={}, txAtiva={}, tenant={}",
+                pjp.getSignature().toShortString(), txActive, tenantId);
+        if (!txActive) {
             return pjp.proceed();
         }
-        Long tenantId = TenantContext.get();
-        if (tenantId != null) {
-            // set_config(name, value, is_local) — is_local=true equivale a SET LOCAL
-            entityManager.createNativeQuery(
-                    "SELECT set_config('app.current_partido_id', :tenant, TRUE)")
-                    .setParameter("tenant", tenantId.toString())
-                    .getSingleResult();
-        } else {
-            // Limpa explicitamente para tenants nulos (SUPER_ADMIN sem sessão de suporte)
-            entityManager.createNativeQuery(
-                    "SELECT set_config('app.current_partido_id', '', TRUE)")
-                    .getSingleResult();
-        }
+        String valor = tenantId == null ? "" : tenantId.toString();
+        entityManager.createNativeQuery(
+                "SELECT set_config('app.current_partido_id', :tenant, TRUE)")
+                .setParameter("tenant", valor)
+                .getSingleResult();
         return pjp.proceed();
     }
 }

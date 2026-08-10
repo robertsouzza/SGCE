@@ -29,7 +29,7 @@ O sistema é gerado em **11 passos verificáveis** (uma skill Claude Code por pa
 |---|---|---|---|
 | 00 | [sgce-00-infra-base](skills/sgce-00-infra-base/SKILL.md) | ✅ concluída | Monorepo + `docker-compose.yml` de infraestrutura (Postgres+PostGIS, Redis, MinIO) |
 | 01 | [sgce-01-backend-core](skills/sgce-01-backend-core/SKILL.md) | ✅ concluída | Spring Boot + módulos `shared` (RLS, CORS, OpenAPI, S3), `autenticacao` (JWT em cookie httpOnly + CSRF), `auditoria` + ArchUnit |
-| 02 | [sgce-02-modulo-partido-equipe](skills/sgce-02-modulo-partido-equipe/SKILL.md) | ⏳ pendente | Partido, Candidato, Equipe, MembroEquipe, EquipeCandidato |
+| 02 | [sgce-02-modulo-partido-equipe](skills/sgce-02-modulo-partido-equipe/SKILL.md) | ✅ concluída | Partido, Candidato, Equipe, MembroEquipe, EquipeCandidato |
 | 03 | [sgce-03-modulo-financeiro](skills/sgce-03-modulo-financeiro/SKILL.md) | ⏳ pendente | Recurso, Despesa, PagamentoEquipe, fluxo de aprovação, relatório PDF/JSON |
 | 04 | [sgce-04-modulo-eleitores](skills/sgce-04-modulo-eleitores/SKILL.md) | ⏳ pendente | Eleitor, Abordagem, IntencaoVoto, RegiaoEleitoral + endpoint de sincronização offline |
 | 05 | [sgce-05-modulo-consentimento](skills/sgce-05-modulo-consentimento/SKILL.md) | ⏳ pendente | ConsentimentoLGPD + anonimização + deep-link `wa.me` + stub WhatsApp |
