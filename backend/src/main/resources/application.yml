@@ -1,0 +1,104 @@
+spring:
+  application:
+    name: sgce-backend
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  datasource:
+    url: ${SGCE_DB_URL:jdbc:postgresql://localhost:5433/sgce}
+    username: ${SGCE_DB_USER:sgce}
+    password: ${SGCE_DB_PASSWORD:sgce_dev}
+    hikari:
+      auto-commit: false
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          time_zone: UTC
+        format_sql: false
+    open-in-view: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+  jackson:
+    default-property-inclusion: non_null
+    serialization:
+      write-dates-as-timestamps: false
+
+server:
+  port: 8080
+  error:
+    include-message: always
+    include-binding-errors: always
+
+sgce:
+  jwt:
+    # Secret DEV — nunca usar em prod. Skill 10 externaliza via env.
+    secret: ${SGCE_JWT_SECRET:dev-only-secret-please-change-at-least-64-characters-long-for-hs256}
+    access-token-ttl-minutes: 15
+    refresh-token-ttl-days: 7
+    access-cookie-name: sgce_access
+    refresh-cookie-name: sgce_refresh
+    cookie-secure: ${SGCE_JWT_COOKIE_SECURE:false}
+  cors:
+    allowed-origins: ${SGCE_CORS_ORIGINS:http://localhost:4200,http://localhost}
+  s3:
+    endpoint: ${SGCE_S3_ENDPOINT:http://localhost:9000}
+    region: ${SGCE_S3_REGION:us-east-1}
+    access-key: ${SGCE_S3_ACCESS_KEY:minioadmin}
+    secret-key: ${SGCE_S3_SECRET_KEY:minioadmin}
+    bucket: ${SGCE_S3_BUCKET:sgce-uploads}
+    path-style-access: true
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when_authorized
+
+logging:
+  level:
+    com.campanha: INFO
+    org.hibernate.SQL: WARN
+
+---
+spring:
+  config:
+    activate:
+      on-profile: docker
+  datasource:
+    url: jdbc:postgresql://postgres:5432/sgce
+
+sgce:
+  s3:
+    endpoint: http://minio:9000
+  cors:
+    allowed-origins: http://localhost,http://frontend
+
+---
+spring:
+  config:
+    activate:
+      on-profile: test
+  flyway:
+    enabled: false
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+
+sgce:
+  jwt:
+    secret: test-only-secret-please-change-at-least-64-characters-long-for-hs256
