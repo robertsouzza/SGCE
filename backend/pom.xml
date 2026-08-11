@@ -131,6 +131,13 @@
             <artifactId>s3</artifactId>
         </dependency>
 
+        <!-- PDF (relatórios financeiros — RF-09) -->
+        <dependency>
+            <groupId>com.github.librepdf</groupId>
+            <artifactId>openpdf</artifactId>
+            <version>${openpdf.version}</version>
+        </dependency>
+
         <!-- Lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>
