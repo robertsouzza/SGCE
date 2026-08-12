@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/eleitores")
@@ -40,13 +39,18 @@ public class EleitorController {
         return uc.listarEleitores();
     }
 
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','LIDER_EQUIPE','MEMBRO_EQUIPE','CANDIDATO')")
+    public ResponseEntity<Eleitor> buscarPorId(@PathVariable Long id) {
+        return uc.buscarEleitor(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
     @GetMapping("/{id}/regiao")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<RegiaoEleitoral> regiaoPorEleitor(@PathVariable Long id) {
-        // Localiza o eleitor, retorna a região que contém sua geolocalização.
-        return uc.listarEleitores().stream()
-                .filter(e -> e.id().equals(id))
-                .findFirst()
+        return uc.buscarEleitor(id)
                 .flatMap(e -> uc.consultarRegiaoPorGeo(e.geolocalizacao()))
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
@@ -56,6 +60,21 @@ public class EleitorController {
     @PreAuthorize("hasAnyRole('ADMIN','LIDER_EQUIPE','MEMBRO_EQUIPE')")
     public Eleitor anonimizar(@PathVariable Long id) {
         return uc.anonimizarEleitor(id);
+    }
+
+    /**
+     * Contagem agregada sem PII — usado pelo dashboard e para provar que
+     * agregados sobrevivem à revogação de consentimento_dados (D-02).
+     * Passa pelo use case @Transactional para o TenantAwareTransactionAspect
+     * aplicar o SET LOCAL app.current_partido_id (sem isso, RLS filtra tudo).
+     */
+    @GetMapping("/agregado")
+    @PreAuthorize("hasAnyRole('ADMIN','LIDER_EQUIPE','MEMBRO_EQUIPE','CANDIDATO')")
+    public Map<String, Object> agregadoPorRegiao(@RequestParam Long regiaoId) {
+        return Map.of(
+                "regiaoId", regiaoId,
+                "totalEleitores", uc.contarEleitoresPorRegiao(regiaoId)
+        );
     }
 
     public record CadastrarEleitorRequest(

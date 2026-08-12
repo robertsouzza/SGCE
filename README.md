@@ -32,7 +32,7 @@ O sistema é gerado em **11 passos verificáveis** (uma skill Claude Code por pa
 | 02 | [sgce-02-modulo-partido-equipe](skills/sgce-02-modulo-partido-equipe/SKILL.md) | ✅ concluída | Partido, Candidato, Equipe, MembroEquipe, EquipeCandidato |
 | 03 | [sgce-03-modulo-financeiro](skills/sgce-03-modulo-financeiro/SKILL.md) | ✅ concluída | Recurso, Despesa, PagamentoEquipe, fluxo de aprovação, relatório PDF/JSON |
 | 04 | [sgce-04-modulo-eleitores](skills/sgce-04-modulo-eleitores/SKILL.md) | ✅ concluída | Eleitor, Abordagem, IntencaoVoto, RegiaoEleitoral + endpoint de sincronização offline |
-| 05 | [sgce-05-modulo-consentimento](skills/sgce-05-modulo-consentimento/SKILL.md) | ⏳ pendente | ConsentimentoLGPD + anonimização + deep-link `wa.me` + stub WhatsApp |
+| 05 | [sgce-05-modulo-consentimento](skills/sgce-05-modulo-consentimento/SKILL.md) | ✅ concluída | ConsentimentoLGPD + anonimização + deep-link `wa.me` + stub WhatsApp |
 | 06 | [sgce-06-modulo-tempo-real-superadmin](skills/sgce-06-modulo-tempo-real-superadmin/SKILL.md) | ⏳ pendente | WebSocket/Redis + break-glass dual-control do Super Admin |
 | 07 | [sgce-07-frontend-core-gestao](skills/sgce-07-frontend-core-gestao/SKILL.md) | ⏳ pendente | Angular PWA + core (auth/realtime/offline) + features de gestão |
 | 08 | [sgce-08-frontend-campo-dashboard](skills/sgce-08-frontend-campo-dashboard/SKILL.md) | ⏳ pendente | Eleitores (offline-first) + mapa hierárquico + dashboard tempo real |

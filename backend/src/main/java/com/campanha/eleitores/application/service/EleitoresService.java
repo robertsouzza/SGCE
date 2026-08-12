@@ -105,6 +105,18 @@ public class EleitoresService implements EleitoresUseCases {
         return eleitorRepo.findAll();
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<Eleitor> buscarEleitor(Long id) {
+        return eleitorRepo.findById(id);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public long contarEleitoresPorRegiao(Long regiaoId) {
+        return eleitorRepo.contarPorRegiao(regiaoId);
+    }
+
     private Long tenantObrigatorio() {
         Long t = TenantContext.get();
         if (t == null) {

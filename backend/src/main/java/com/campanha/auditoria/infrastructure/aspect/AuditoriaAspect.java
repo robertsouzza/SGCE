@@ -3,7 +3,7 @@ package com.campanha.auditoria.infrastructure.aspect;
 import com.campanha.auditoria.application.port.out.LogAuditoriaRepositoryPort;
 import com.campanha.auditoria.domain.Auditavel;
 import com.campanha.auditoria.domain.LogAuditoria;
-import com.campanha.autenticacao.infrastructure.security.AuthenticatedUser;
+import com.campanha.autenticacao.domain.AuthenticatedUser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;

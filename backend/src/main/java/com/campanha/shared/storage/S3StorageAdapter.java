@@ -1,5 +1,6 @@
 package com.campanha.shared.storage;
 
+import com.campanha.consentimento.application.port.out.AssinaturaStoragePort;
 import com.campanha.financeiro.application.port.out.ComprovanteStoragePort;
 import com.campanha.shared.config.S3Config;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +31,7 @@ import java.time.Duration;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class S3StorageAdapter implements ComprovanteStoragePort {
+public class S3StorageAdapter implements ComprovanteStoragePort, AssinaturaStoragePort {
 
     private final S3Client s3Client;
     private final S3Presigner s3Presigner;

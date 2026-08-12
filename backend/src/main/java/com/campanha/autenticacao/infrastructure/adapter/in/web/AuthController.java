@@ -3,7 +3,7 @@ package com.campanha.autenticacao.infrastructure.adapter.in.web;
 import com.campanha.autenticacao.application.port.in.LoginUseCase;
 import com.campanha.autenticacao.application.port.out.UsuarioRepositoryPort;
 import com.campanha.autenticacao.domain.Usuario;
-import com.campanha.autenticacao.infrastructure.security.AuthenticatedUser;
+import com.campanha.autenticacao.domain.AuthenticatedUser;
 import com.campanha.autenticacao.infrastructure.security.JwtProperties;
 import com.campanha.autenticacao.infrastructure.security.JwtTokenProvider;
 import jakarta.servlet.http.Cookie;

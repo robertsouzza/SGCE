@@ -1,6 +1,6 @@
 package com.campanha.financeiro.infrastructure.adapter.in.web;
 
-import com.campanha.autenticacao.infrastructure.security.AuthenticatedUser;
+import com.campanha.autenticacao.domain.AuthenticatedUser;
 import com.campanha.financeiro.application.port.in.FinanceiroUseCases;
 import com.campanha.financeiro.domain.CategoriaDespesa;
 import com.campanha.financeiro.domain.Despesa;

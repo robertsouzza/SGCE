@@ -26,6 +26,10 @@ public interface EleitoresUseCases {
 
     List<Eleitor> listarEleitores();
 
+    Optional<Eleitor> buscarEleitor(Long id);
+
+    long contarEleitoresPorRegiao(Long regiaoId);
+
     record CadastrarEleitorCommand(
             String nomeCompleto,
             String endereco,

@@ -1,5 +1,6 @@
 package com.campanha.autenticacao.infrastructure.security;
 
+import com.campanha.autenticacao.domain.AuthenticatedUser;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;

@@ -1,6 +1,6 @@
 package com.campanha.eleitores.infrastructure.adapter.in.web;
 
-import com.campanha.autenticacao.infrastructure.security.AuthenticatedUser;
+import com.campanha.autenticacao.domain.AuthenticatedUser;
 import com.campanha.eleitores.application.port.in.EleitoresUseCases;
 import com.campanha.eleitores.application.port.in.EleitoresUseCases.OperacaoSync;
 import com.campanha.eleitores.application.port.in.EleitoresUseCases.ResultadoLoteSync;
