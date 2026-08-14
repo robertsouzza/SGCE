@@ -1,7 +1,6 @@
 package com.campanha.consentimento.application.service;
 
 import com.campanha.consentimento.application.port.in.ConsentimentoUseCases.DeepLinkOptInResult;
-import com.campanha.consentimento.application.port.out.ConsentimentoRepositoryPort;
 import com.campanha.consentimento.application.port.out.WhatsAppOptInPort;
 import com.campanha.partido.application.port.out.CandidatoRepositoryPort;
 import com.campanha.partido.application.port.out.PartidoRepositoryPort;
@@ -33,7 +32,6 @@ public class DeepLinkService {
 
     private final PartidoRepositoryPort partidoRepo;
     private final CandidatoRepositoryPort candidatoRepo;
-    private final ConsentimentoRepositoryPort consentimentoRepo;
     private final WhatsAppOptInPort whatsAppOptIn;
 
     public DeepLinkOptInResult gerar(Long abordagemId, Long candidatoId, Long partidoId) {

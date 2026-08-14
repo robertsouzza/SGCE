@@ -1,0 +1,29 @@
+{
+  "groups": [
+    {
+      "name": "sgce",
+      "description": "Configurações raiz do SGCE."
+    },
+    {
+      "name": "sgce.jwt",
+      "type": "com.campanha.autenticacao.infrastructure.security.JwtProperties",
+      "sourceType": "com.campanha.autenticacao.infrastructure.security.JwtProperties"
+    },
+    {
+      "name": "sgce.s3",
+      "type": "com.campanha.shared.config.S3Config",
+      "sourceType": "com.campanha.shared.config.S3Config"
+    },
+    {
+      "name": "sgce.cors",
+      "description": "Configuração de CORS do backend SGCE."
+    }
+  ],
+  "properties": [
+    {
+      "name": "sgce.cors.allowed-origins",
+      "type": "java.util.List<java.lang.String>",
+      "description": "Origens permitidas pelo filtro CORS (lista separada por vírgula)."
+    }
+  ]
+}

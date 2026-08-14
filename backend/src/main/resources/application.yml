@@ -22,8 +22,8 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         jdbc:
-          time_zone: UTC
-        format_sql: false
+          "[time_zone]": UTC
+        "[format_sql]": false
     open-in-view: false
   flyway:
     enabled: true
@@ -80,8 +80,8 @@ management:
 
 logging:
   level:
-    com.campanha: INFO
-    org.hibernate.SQL: WARN
+    "[com.campanha]": INFO
+    "[org.hibernate.SQL]": WARN
 
 ---
 spring:
