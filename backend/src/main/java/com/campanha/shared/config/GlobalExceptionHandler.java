@@ -26,7 +26,10 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<Map<String, Object>> handleAccessDenied(AccessDeniedException e) {
-        return build(HttpStatus.FORBIDDEN, "ACESSO_NEGADO", e.getMessage());
+        // Mensagem em UPPER_SNAKE_CASE vira código explícito (ex: MODO_CAMPO_INATIVO).
+        String msg = e.getMessage() == null ? "" : e.getMessage();
+        String codigo = msg.matches("[A-Z_]+") ? msg : "ACESSO_NEGADO";
+        return build(HttpStatus.FORBIDDEN, codigo, msg);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

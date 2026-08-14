@@ -169,6 +169,14 @@ public class ConsentimentoService implements ConsentimentoUseCases {
         return consentimentoRepo.saveMembro(cm.revogarRastreamento());
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public boolean consentimentoRastreamentoAtivo(Long usuarioId) {
+        return consentimentoRepo.findMembroPorUsuario(usuarioId)
+                .map(ConsentimentoMembro::rastreamentoVigente)
+                .orElse(false);
+    }
+
     private Long tenantObrigatorio() {
         Long t = TenantContext.get();
         if (t == null) {

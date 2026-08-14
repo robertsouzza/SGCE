@@ -34,13 +34,13 @@ public class EleitorController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN','LIDER_EQUIPE','MEMBRO_EQUIPE','CANDIDATO')")
+    @PreAuthorize("hasAnyRole('ADMIN','LIDER_EQUIPE','MEMBRO_EQUIPE','CANDIDATO','SUPER_ADMIN_PLATAFORMA')")
     public List<Eleitor> listar() {
         return uc.listarEleitores();
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN','LIDER_EQUIPE','MEMBRO_EQUIPE','CANDIDATO')")
+    @PreAuthorize("hasAnyRole('ADMIN','LIDER_EQUIPE','MEMBRO_EQUIPE','CANDIDATO','SUPER_ADMIN_PLATAFORMA')")
     public ResponseEntity<Eleitor> buscarPorId(@PathVariable Long id) {
         return uc.buscarEleitor(id)
                 .map(ResponseEntity::ok)
@@ -69,7 +69,7 @@ public class EleitorController {
      * aplicar o SET LOCAL app.current_partido_id (sem isso, RLS filtra tudo).
      */
     @GetMapping("/agregado")
-    @PreAuthorize("hasAnyRole('ADMIN','LIDER_EQUIPE','MEMBRO_EQUIPE','CANDIDATO')")
+    @PreAuthorize("hasAnyRole('ADMIN','LIDER_EQUIPE','MEMBRO_EQUIPE','CANDIDATO','SUPER_ADMIN_PLATAFORMA')")
     public Map<String, Object> agregadoPorRegiao(@RequestParam Long regiaoId) {
         return Map.of(
                 "regiaoId", regiaoId,

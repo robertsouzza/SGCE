@@ -1,5 +1,6 @@
 package com.campanha.autenticacao.infrastructure.security;
 
+import com.campanha.auditoria.infrastructure.security.SessaoSuporteFilter;
 import com.campanha.shared.multitenancy.TenantFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -24,6 +25,7 @@ public class SecurityConfig {
 
     private final JwtCookieAuthenticationFilter jwtFilter;
     private final TenantFilter tenantFilter;
+    private final SessaoSuporteFilter sessaoSuporteFilter;
     private final UrlBasedCorsConfigurationSource corsConfigurationSource;
     private final RestAuthenticationEntryPoint authEntryPoint;
 
@@ -43,6 +45,13 @@ public class SecurityConfig {
     @Bean
     public FilterRegistrationBean<TenantFilter> tenantFilterRegistration(TenantFilter filter) {
         FilterRegistrationBean<TenantFilter> reg = new FilterRegistrationBean<>(filter);
+        reg.setEnabled(false);
+        return reg;
+    }
+
+    @Bean
+    public FilterRegistrationBean<SessaoSuporteFilter> sessaoSuporteFilterRegistration(SessaoSuporteFilter filter) {
+        FilterRegistrationBean<SessaoSuporteFilter> reg = new FilterRegistrationBean<>(filter);
         reg.setEnabled(false);
         return reg;
     }
@@ -76,6 +85,7 @@ public class SecurityConfig {
             .addFilterAfter(new CsrfCookieMaterializerFilter(), CsrfFilter.class)
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
             .addFilterAfter(tenantFilter, JwtCookieAuthenticationFilter.class)
+            .addFilterAfter(sessaoSuporteFilter, TenantFilter.class)
             .httpBasic(basic -> basic.disable())
             .formLogin(form -> form.disable());
 

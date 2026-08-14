@@ -33,6 +33,13 @@ public interface ConsentimentoUseCases {
 
     ConsentimentoMembro revogarConsentimentoMembro(Long usuarioId);
 
+    /**
+     * Verifica se o voluntário aceitou rastreamento e o consentimento
+     * ainda está vigente (D-10). Consumido pela skill 06 antes de aceitar
+     * um heartbeat de localização.
+     */
+    boolean consentimentoRastreamentoAtivo(Long usuarioId);
+
     record CapturarConsentimentoCommand(
             Long eleitorId,
             Long abordagemId,
