@@ -1,0 +1,16 @@
+{
+  "//1": "SGCE — configurações compartilhadas do VSCode.",
+  "//2": "Desabilita o Null Analysis do JDT (redhat.java): o projeto não usa",
+  "//3": "biblioteca de anotações de nullability (Checkerframework, JSR-305),",
+  "//4": "então essa análise gera apenas falsos positivos como 'The expression",
+  "//5": "of type X needs unchecked conversion to conform to @NonNull X'.",
+  "//6": "Se um dia adotarmos annotations reais de null-safety, mudar para",
+  "//7": "'automatic'.",
+  "java.compile.nullAnalysis.mode": "disabled",
+
+  "//8": "Formata só Java com o formatter padrão do redhat.java, sem tocar",
+  "//9": "em YAML/JSON/etc. (evita conflito com outros formatters).",
+  "[java]": {
+    "editor.defaultFormatter": "redhat.java"
+  }
+}

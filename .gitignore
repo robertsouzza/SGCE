@@ -34,7 +34,9 @@ playwright/.cache/
 
 # --- IDEs ---
 .idea/
-.vscode/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
 *.iml
 *.swp
 *.swo
