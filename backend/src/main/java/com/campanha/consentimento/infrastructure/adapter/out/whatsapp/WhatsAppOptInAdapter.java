@@ -15,7 +15,7 @@ import java.util.UUID;
  * - Número de telefone dedicado
  * - Template de mensagem aprovado
  *
- * TODO(D-03): substituir por integração real.
+ * Substituir por integração real em skill dedicada (ver decisão D-03).
  */
 @Component
 @Slf4j
