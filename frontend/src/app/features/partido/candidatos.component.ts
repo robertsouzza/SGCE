@@ -2,7 +2,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/auth/auth.service';
-import { Cargo, Candidato, PartidoService } from './partido.service';
+import { Cargo, Candidato, CARGOS, PartidoService, UFS } from './partido.service';
 
 @Component({
   selector: 'sgce-candidatos',
@@ -18,15 +18,18 @@ import { Cargo, Candidato, PartidoService } from './partido.service';
       <label>Número (candidato) <input name="numero" type="number" [(ngModel)]="form.numeroCandidato" required /></label>
       <label>Cargo
         <select name="cargo" [(ngModel)]="form.cargo" required>
-          <option value="PRESIDENTE">Presidente</option>
-          <option value="SENADOR">Senador</option>
-          <option value="DEPUTADO_FEDERAL">Deputado Federal</option>
-          <option value="DEPUTADO_ESTADUAL">Deputado Estadual</option>
-          <option value="PREFEITO">Prefeito</option>
-          <option value="VEREADOR">Vereador</option>
+          @for (c of cargos; track c.valor) {
+            <option [value]="c.valor">{{ c.rotulo }}</option>
+          }
         </select>
       </label>
-      <label>UF <input name="uf" [(ngModel)]="form.uf" maxlength="2" required /></label>
+      <label>UF
+        <select name="uf" [(ngModel)]="form.uf" required>
+          @for (uf of ufs; track uf.sigla) {
+            <option [value]="uf.sigla">{{ uf.sigla }} — {{ uf.nome }}</option>
+          }
+        </select>
+      </label>
       @if (exigeMunicipio()) {
         <label>Município <input name="municipio" [(ngModel)]="form.municipio" required /></label>
       }
@@ -62,6 +65,8 @@ export class CandidatosComponent {
   candidatos = signal<Candidato[]>([]);
   salvando = signal(false);
   erro = signal<string | null>(null);
+  cargos = CARGOS;
+  ufs = UFS;
 
   exigeMunicipio = computed(() => PartidoService.exigeMunicipio(this.form.cargo));
   erroValidacao = computed(() =>

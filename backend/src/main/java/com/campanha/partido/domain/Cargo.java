@@ -2,6 +2,7 @@ package com.campanha.partido.domain;
 
 public enum Cargo {
     PRESIDENTE,
+    GOVERNADOR,
     SENADOR,
     DEPUTADO_FEDERAL,
     DEPUTADO_ESTADUAL,

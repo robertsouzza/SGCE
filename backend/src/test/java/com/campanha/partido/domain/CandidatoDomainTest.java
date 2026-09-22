@@ -21,7 +21,7 @@ class CandidatoDomainTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = Cargo.class, names = {"PRESIDENTE", "SENADOR", "DEPUTADO_FEDERAL", "DEPUTADO_ESTADUAL"})
+    @EnumSource(value = Cargo.class, names = {"PRESIDENTE", "GOVERNADOR", "SENADOR", "DEPUTADO_FEDERAL", "DEPUTADO_ESTADUAL"})
     void naoExigeMunicipioParaCargosNacionaisEEstaduais(Cargo cargo) {
         Candidato c = new Candidato(null, 1L, null, "Fulano", "12345", 55, cargo, "SP", null, Instant.now());
         assertNull(c.municipio());
