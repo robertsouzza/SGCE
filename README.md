@@ -35,7 +35,7 @@ O sistema é gerado em **11 passos verificáveis** (uma skill Claude Code por pa
 | 05 | [sgce-05-modulo-consentimento](skills/sgce-05-modulo-consentimento/SKILL.md) | ✅ concluída | ConsentimentoLGPD + anonimização + deep-link `wa.me` + stub WhatsApp |
 | 06 | [sgce-06-modulo-tempo-real-superadmin](skills/sgce-06-modulo-tempo-real-superadmin/SKILL.md) | ✅ concluída | WebSocket/Redis + break-glass dual-control do Super Admin |
 | 07 | [sgce-07-frontend-core-gestao](skills/sgce-07-frontend-core-gestao/SKILL.md) | ✅ concluída | Angular PWA + core (auth/realtime/offline) + features de gestão |
-| 08 | [sgce-08-frontend-campo-dashboard](skills/sgce-08-frontend-campo-dashboard/SKILL.md) | ⏳ pendente | Eleitores (offline-first) + mapa hierárquico + dashboard tempo real |
+| 08 | [sgce-08-frontend-campo-dashboard](skills/sgce-08-frontend-campo-dashboard/SKILL.md) | ✅ concluída | Eleitores (offline-first) + mapa hierárquico + dashboard tempo real |
 | 09 | [sgce-09-testes-integracao-e2e](skills/sgce-09-testes-integracao-e2e/SKILL.md) | ⏳ pendente | Testcontainers + Playwright + teste dedicado de isolamento multi-tenant |
 | 10 | [sgce-10-deploy-cicd](skills/sgce-10-deploy-cicd/SKILL.md) | ⏳ pendente | Dockerfiles finais + `docker-compose.yml` unificado + GitHub Actions + README final |
 

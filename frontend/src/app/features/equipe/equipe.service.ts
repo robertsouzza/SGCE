@@ -46,4 +46,7 @@ export class EquipeService {
   vincularCandidato(equipeId: number, input: { candidatoId: number; vigenteDesde: string; vigenteAte?: string }): Observable<EquipeCandidato> {
     return this.http.post<EquipeCandidato>(`/api/equipes/${equipeId}/candidatos`, input);
   }
+  listarCandidatosDaEquipe(equipeId: number): Observable<EquipeCandidato[]> {
+    return this.http.get<EquipeCandidato[]>(`/api/equipes/${equipeId}/candidatos`);
+  }
 }

@@ -34,6 +34,21 @@ export const routes: Routes = [
         canActivate: [roleGuard('ADMIN', 'GERENTE_FINANCEIRO', 'SECRETARIO', 'CANDIDATO')],
         loadComponent: () => import('./features/financeiro/financeiro.component').then(m => m.FinanceiroComponent),
       },
+      {
+        path: 'eleitores',
+        canActivate: [roleGuard('ADMIN', 'LIDER_EQUIPE', 'MEMBRO_EQUIPE', 'CANDIDATO')],
+        loadComponent: () => import('./features/eleitor/eleitores.component').then(m => m.EleitoresComponent),
+      },
+      {
+        path: 'eleitores/:id',
+        canActivate: [roleGuard('ADMIN', 'LIDER_EQUIPE', 'MEMBRO_EQUIPE', 'CANDIDATO')],
+        loadComponent: () => import('./features/eleitor/eleitor-detalhe.component').then(m => m.EleitorDetalheComponent),
+      },
+      {
+        path: 'mapa',
+        canActivate: [roleGuard('ADMIN', 'LIDER_EQUIPE', 'MEMBRO_EQUIPE', 'CANDIDATO', 'SUPER_ADMIN_PLATAFORMA')],
+        loadComponent: () => import('./features/mapa/mapa.component').then(m => m.MapaComponent),
+      },
     ],
   },
   { path: '**', redirectTo: '' },

@@ -25,6 +25,13 @@
             ],
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
+            "serviceWorker": "ngsw-config.json",
+            "allowedCommonJsDependencies": [
+              "leaflet",
+              "leaflet.heat",
+              "sockjs-client",
+              "@stomp/stompjs"
+            ],
             "assets": [
               {
                 "glob": "**/*",

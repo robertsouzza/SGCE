@@ -1,0 +1,16 @@
+{
+  "name": "SGCE Campo",
+  "short_name": "SGCE",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#1e293b",
+  "description": "Sistema de Gestão de Campanha Eleitoral — modo campo offline-first",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    }
+  ]
+}
