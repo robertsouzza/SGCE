@@ -1,0 +1,17 @@
+# Não envie ao daemon Docker (economiza 500+ MB de I/O em WSL2/NTFS)
+node_modules
+dist
+.angular
+coverage
+.git
+.vscode
+.idea
+*.log
+tmp
+.DS_Store
+Thumbs.db
+
+# Arquivos que não são necessários pro build da imagem
+README.md
+*.md
+.editorconfig
