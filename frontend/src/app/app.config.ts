@@ -14,8 +14,15 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes, withComponentInputBinding()),
     provideHttpClient(withInterceptors([withCredentialsInterceptor, csrfInterceptor])),
+    // Service Worker registrado mas DESABILITADO por padrão em dev/staging.
+    // Habilite via localStorage.setItem('sgce.pwa','on') e recarregue quando
+    // quiser testar o modo PWA (offline-first via SW cache). Skill 10 amarra
+    // isso a uma flag de env.
     provideServiceWorker('ngsw-worker.js', {
-      enabled: !isDevMode(),
+      enabled:
+        !isDevMode() &&
+        typeof localStorage !== 'undefined' &&
+        localStorage.getItem('sgce.pwa') === 'on',
       registrationStrategy: 'registerWhenStable:30000',
     }),
     // Bootstrap: obter cookie XSRF-TOKEN + tentar restaurar sessão via /me
