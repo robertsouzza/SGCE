@@ -30,6 +30,11 @@ export const routes: Routes = [
         loadComponent: () => import('./features/partido/candidato-novo.component').then(m => m.CandidatoNovoComponent),
       },
       {
+        path: 'candidatos/:id/editar',
+        canActivate: [roleGuard('ADMIN', 'SUPER_ADMIN_PLATAFORMA')],
+        loadComponent: () => import('./features/partido/candidato-editar.component').then(m => m.CandidatoEditarComponent),
+      },
+      {
         path: 'equipes',
         canActivate: [roleGuard('ADMIN', 'LIDER_EQUIPE', 'SUPER_ADMIN_PLATAFORMA')],
         loadComponent: () => import('./features/equipe/equipes.component').then(m => m.EquipesComponent),

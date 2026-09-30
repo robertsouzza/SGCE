@@ -55,6 +55,31 @@ public class CandidatoController {
         return service.alterarAtivo(id, true);
     }
 
+    @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Candidato> buscarPorId(@PathVariable Long id) {
+        return service.buscarPorId(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN_PLATAFORMA')")
+    public Candidato atualizar(@PathVariable Long id, @Valid @RequestBody AtualizarCandidatoRequest req) {
+        return service.atualizar(id, new com.campanha.partido.application.service.CandidatoService.AtualizarCandidatoCommand(
+                req.nomeCompleto(), req.tituloEleitor(), req.numeroCandidato(),
+                req.cargo(), req.uf(), req.municipio()));
+    }
+
+    public record AtualizarCandidatoRequest(
+            @NotBlank String nomeCompleto,
+            @NotBlank String tituloEleitor,
+            int numeroCandidato,
+            @NotNull Cargo cargo,
+            @NotBlank @Size(min = 2, max = 2) String uf,
+            String municipio
+    ) {}
+
     public record CadastrarCandidatoRequest(
             @NotNull Long partidoId,
             Long usuarioId,

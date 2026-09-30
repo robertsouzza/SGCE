@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -75,4 +76,49 @@ public class CandidatoService implements CadastrarCandidatoUseCase, ListarCandid
     public List<Candidato> executar() {
         return repo.findAll();
     }
+
+    @Transactional(readOnly = true)
+    public Optional<Candidato> buscarPorId(Long id) {
+        return repo.findById(id);
+    }
+
+    @Transactional
+    @Auditavel(acao = "atualizar_candidato", entidade = "Candidato")
+    public Candidato atualizar(Long candidatoId, AtualizarCandidatoCommand cmd) {
+        Candidato atual = repo.findById(candidatoId)
+                .orElseThrow(() -> new IllegalArgumentException("candidato não encontrado: " + candidatoId));
+        Long tenantAtual = TenantContext.get();
+        if (tenantAtual != null && !tenantAtual.equals(atual.partidoId())) {
+            throw new AccessDeniedException(
+                    "usuário do partido " + tenantAtual + " não pode alterar candidato do partido " + atual.partidoId());
+        }
+        if (!atual.tituloEleitor().equals(cmd.tituloEleitor())
+                && repo.existsByTituloEleitorAndPartidoId(cmd.tituloEleitor(), atual.partidoId())) {
+            throw new IllegalArgumentException(
+                    "já existe candidato com título " + cmd.tituloEleitor() + " neste partido");
+        }
+        Candidato atualizado = new Candidato(
+                atual.id(),
+                atual.partidoId(),
+                atual.usuarioId(),
+                cmd.nomeCompleto(),
+                cmd.tituloEleitor(),
+                cmd.numeroCandidato(),
+                cmd.cargo(),
+                cmd.uf().toUpperCase(),
+                cmd.municipio(),
+                atual.ativo(),
+                atual.criadoEm()
+        );
+        return repo.save(atualizado);
+    }
+
+    public record AtualizarCandidatoCommand(
+            String nomeCompleto,
+            String tituloEleitor,
+            int numeroCandidato,
+            com.campanha.partido.domain.Cargo cargo,
+            String uf,
+            String municipio
+    ) {}
 }

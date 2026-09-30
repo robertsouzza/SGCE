@@ -29,11 +29,14 @@ interface Filtros {
         <div class="grid">
           <label>
             Nome
-            <input type="text" [(ngModel)]="filtros.nome" placeholder="Pesquisar por nome" (input)="resetPagina()" />
+            <input type="text" [ngModel]="filtros().nome"
+                   (ngModelChange)="alterarFiltro('nome', $event)"
+                   placeholder="Pesquisar por nome" />
           </label>
           <label>
             Cargo
-            <select [(ngModel)]="filtros.cargo" (change)="resetPagina()">
+            <select [ngModel]="filtros().cargo"
+                    (ngModelChange)="alterarFiltro('cargo', $event)">
               <option value="">Todos</option>
               @for (c of cargos; track c.valor) {
                 <option [value]="c.valor">{{ c.rotulo }}</option>
@@ -42,7 +45,8 @@ interface Filtros {
           </label>
           <label>
             UF
-            <select [(ngModel)]="filtros.uf" (change)="resetPagina()">
+            <select [ngModel]="filtros().uf"
+                    (ngModelChange)="alterarFiltro('uf', $event)">
               <option value="">Todas</option>
               @for (u of ufs; track u.sigla) {
                 <option [value]="u.sigla">{{ u.sigla }} — {{ u.nome }}</option>
@@ -51,11 +55,14 @@ interface Filtros {
           </label>
           <label>
             Município
-            <input type="text" [(ngModel)]="filtros.municipio" placeholder="Pesquisar por município" (input)="resetPagina()" />
+            <input type="text" [ngModel]="filtros().municipio"
+                   (ngModelChange)="alterarFiltro('municipio', $event)"
+                   placeholder="Pesquisar por município" />
           </label>
           <label>
             Status
-            <select [(ngModel)]="filtros.status" (change)="resetPagina()">
+            <select [ngModel]="filtros().status"
+                    (ngModelChange)="alterarFiltro('status', $event)">
               <option value="ativos">Somente ativos</option>
               <option value="inativos">Somente inativos</option>
               <option value="todos">Todos</option>
@@ -96,6 +103,7 @@ interface Filtros {
                 </span>
               </td>
               <td class="acoes">
+                <a [routerLink]="['/candidatos', c.id, 'editar']" class="btn">Editar</a>
                 @if (c.ativo) {
                   <button type="button" class="btn warn" (click)="inativar(c)" [disabled]="processando() === c.id">
                     Inativar
@@ -149,7 +157,7 @@ interface Filtros {
       .badge { padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600; }
       .badge.ok { background: #dcfce7; color: #166534; }
       .badge.off { background: #f1f5f9; color: #64748b; }
-      .acoes { white-space: nowrap; }
+      .acoes { white-space: nowrap; display: flex; gap: 6px; }
       .vazio { text-align: center; padding: 24px; color: #94a3b8; }
       .btn { padding: 6px 12px; border: 1px solid #cbd5e1; background: #f1f5f9; border-radius: 4px; cursor: pointer; font-size: 13px; text-decoration: none; color: #1e293b; display: inline-block; }
       .btn.primary { background: #2563eb; color: #fff; border-color: #2563eb; }
@@ -179,10 +187,10 @@ export class CandidatosComponent {
 
   cargos = CARGOS;
   ufs = UFS;
-  filtros: Filtros = { nome: '', cargo: '', uf: '', municipio: '', status: 'ativos' };
+  filtros = signal<Filtros>({ nome: '', cargo: '', uf: '', municipio: '', status: 'ativos' });
 
   filtrados = computed<Candidato[]>(() => {
-    const f = this.filtros;
+    const f = this.filtros();
     return this.candidatos().filter(c => {
       if (f.status === 'ativos' && !c.ativo) return false;
       if (f.status === 'inativos' && c.ativo) return false;
@@ -193,6 +201,11 @@ export class CandidatosComponent {
       return true;
     });
   });
+
+  alterarFiltro<K extends keyof Filtros>(campo: K, valor: Filtros[K]): void {
+    this.filtros.update(f => ({ ...f, [campo]: valor }));
+    this.pagina.set(1);
+  }
 
   totalPaginas = computed(() => Math.max(1, Math.ceil(this.filtrados().length / this.TAMANHO_PAGINA)));
 
@@ -237,7 +250,7 @@ export class CandidatosComponent {
   }
 
   limparFiltros(): void {
-    this.filtros = { nome: '', cargo: '', uf: '', municipio: '', status: 'ativos' };
+    this.filtros.set({ nome: '', cargo: '', uf: '', municipio: '', status: 'ativos' });
     this.resetPagina();
   }
 

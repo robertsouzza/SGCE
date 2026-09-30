@@ -99,6 +99,15 @@ export interface CriarCandidatoInput {
   municipio?: string;
 }
 
+export interface AtualizarCandidatoInput {
+  nomeCompleto: string;
+  tituloEleitor: string;
+  numeroCandidato: number;
+  cargo: Cargo;
+  uf: string;
+  municipio?: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class PartidoService {
   private http = inject(HttpClient);
@@ -113,8 +122,14 @@ export class PartidoService {
   listarCandidatos(): Observable<Candidato[]> {
     return this.http.get<Candidato[]>('/api/candidatos');
   }
+  buscarCandidato(id: number): Observable<Candidato> {
+    return this.http.get<Candidato>(`/api/candidatos/${id}`);
+  }
   criarCandidato(input: CriarCandidatoInput): Observable<Candidato> {
     return this.http.post<Candidato>('/api/candidatos', input);
+  }
+  atualizarCandidato(id: number, input: AtualizarCandidatoInput): Observable<Candidato> {
+    return this.http.put<Candidato>(`/api/candidatos/${id}`, input);
   }
   inativarCandidato(id: number): Observable<Candidato> {
     return this.http.post<Candidato>(`/api/candidatos/${id}/inativar`, {});
