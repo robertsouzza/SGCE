@@ -2,6 +2,7 @@ package com.campanha.partido.infrastructure.adapter.in.web;
 
 import com.campanha.partido.application.port.in.CadastrarCandidatoUseCase;
 import com.campanha.partido.application.port.in.ListarCandidatosUseCase;
+import com.campanha.partido.application.service.CandidatoService;
 import com.campanha.partido.domain.Candidato;
 import com.campanha.partido.domain.Cargo;
 import jakarta.validation.Valid;
@@ -23,6 +24,7 @@ public class CandidatoController {
 
     private final CadastrarCandidatoUseCase cadastrar;
     private final ListarCandidatosUseCase listar;
+    private final CandidatoService service;
 
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN_PLATAFORMA')")
@@ -39,6 +41,18 @@ public class CandidatoController {
     @PreAuthorize("isAuthenticated()")
     public List<Candidato> listarTodos() {
         return listar.executar();
+    }
+
+    @PostMapping("/{id}/inativar")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN_PLATAFORMA')")
+    public Candidato inativar(@PathVariable Long id) {
+        return service.alterarAtivo(id, false);
+    }
+
+    @PostMapping("/{id}/reativar")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN_PLATAFORMA')")
+    public Candidato reativar(@PathVariable Long id) {
+        return service.alterarAtivo(id, true);
     }
 
     public record CadastrarCandidatoRequest(

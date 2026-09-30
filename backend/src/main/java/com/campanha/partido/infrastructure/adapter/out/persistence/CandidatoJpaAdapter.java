@@ -26,6 +26,7 @@ public class CandidatoJpaAdapter implements CandidatoRepositoryPort {
                 .cargo(c.cargo())
                 .uf(c.uf())
                 .municipio(c.municipio())
+                .ativo(c.ativo())
                 .criadoEm(c.criadoEm())
                 .build();
         return toDomain(repo.save(entity));
@@ -57,6 +58,7 @@ public class CandidatoJpaAdapter implements CandidatoRepositoryPort {
                 e.getCargo(),
                 e.getUf(),
                 e.getMunicipio(),
+                e.isAtivo(),
                 e.getCriadoEm()
         );
     }

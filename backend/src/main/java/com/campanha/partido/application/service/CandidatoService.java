@@ -48,9 +48,26 @@ public class CandidatoService implements CadastrarCandidatoUseCase, ListarCandid
                 cmd.cargo(),
                 cmd.uf().toUpperCase(),
                 cmd.municipio(),
+                true,
                 Instant.now()
         );
         return repo.save(novo);
+    }
+
+    @Transactional
+    @Auditavel(acao = "alterar_ativo_candidato", entidade = "Candidato")
+    public Candidato alterarAtivo(Long candidatoId, boolean ativo) {
+        Candidato atual = repo.findById(candidatoId)
+                .orElseThrow(() -> new IllegalArgumentException("candidato não encontrado: " + candidatoId));
+        Long tenantAtual = TenantContext.get();
+        if (tenantAtual != null && !tenantAtual.equals(atual.partidoId())) {
+            throw new AccessDeniedException(
+                    "usuário do partido " + tenantAtual + " não pode alterar candidato do partido " + atual.partidoId());
+        }
+        if (atual.ativo() == ativo) {
+            return atual;
+        }
+        return repo.save(atual.comAtivo(ativo));
     }
 
     @Override

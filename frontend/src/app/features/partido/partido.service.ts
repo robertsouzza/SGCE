@@ -77,6 +77,7 @@ export interface Candidato {
   cargo: Cargo;
   uf: string;
   municipio?: string;
+  ativo: boolean;
   criadoEm: string;
 }
 
@@ -114,6 +115,12 @@ export class PartidoService {
   }
   criarCandidato(input: CriarCandidatoInput): Observable<Candidato> {
     return this.http.post<Candidato>('/api/candidatos', input);
+  }
+  inativarCandidato(id: number): Observable<Candidato> {
+    return this.http.post<Candidato>(`/api/candidatos/${id}/inativar`, {});
+  }
+  reativarCandidato(id: number): Observable<Candidato> {
+    return this.http.post<Candidato>(`/api/candidatos/${id}/reativar`, {});
   }
 
   static exigeMunicipio(cargo: Cargo): boolean {

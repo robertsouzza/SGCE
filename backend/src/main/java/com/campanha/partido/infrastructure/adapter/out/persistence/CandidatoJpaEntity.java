@@ -43,6 +43,9 @@ public class CandidatoJpaEntity {
 
     private String municipio;
 
+    @Column(nullable = false)
+    private boolean ativo;
+
     @Column(name = "criado_em", nullable = false)
     private Instant criadoEm;
 }

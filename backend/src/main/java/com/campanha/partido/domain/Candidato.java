@@ -12,6 +12,7 @@ public record Candidato(
         Cargo cargo,
         String uf,
         String municipio,
+        boolean ativo,
         Instant criadoEm
 ) {
     public Candidato {
@@ -33,5 +34,11 @@ public record Candidato(
         if (cargo.exigeMunicipio() && (municipio == null || municipio.isBlank())) {
             throw new MunicipioObrigatorioException(cargo);
         }
+    }
+
+    /** Retorna cópia deste candidato com o flag ativo alterado (soft delete). */
+    public Candidato comAtivo(boolean novoAtivo) {
+        return new Candidato(id, partidoId, usuarioId, nomeCompleto, tituloEleitor,
+                numeroCandidato, cargo, uf, municipio, novoAtivo, criadoEm);
     }
 }
