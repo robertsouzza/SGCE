@@ -1,6 +1,7 @@
 package com.campanha.eleitores.infrastructure.adapter.in.web;
 
 import com.campanha.eleitores.application.port.in.EleitoresUseCases;
+import com.campanha.eleitores.application.service.EleitoresService;
 import com.campanha.eleitores.domain.Eleitor;
 import com.campanha.eleitores.domain.Ponto;
 import com.campanha.eleitores.domain.RegiaoEleitoral;
@@ -21,6 +22,7 @@ import java.util.Map;
 public class EleitorController {
 
     private final EleitoresUseCases uc;
+    private final EleitoresService service;
 
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN','LIDER_EQUIPE','MEMBRO_EQUIPE')")
@@ -61,6 +63,27 @@ public class EleitorController {
     public Eleitor anonimizar(@PathVariable Long id) {
         return uc.anonimizarEleitor(id);
     }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','LIDER_EQUIPE','MEMBRO_EQUIPE')")
+    public Eleitor atualizar(@PathVariable Long id, @Valid @RequestBody AtualizarEleitorRequest req) {
+        Ponto geo = req.geolocalizacao() == null ? null
+                : new Ponto(req.geolocalizacao().longitude(), req.geolocalizacao().latitude());
+        return service.atualizarEleitor(id, new EleitoresService.AtualizarEleitorCommand(
+                req.nomeCompleto(), req.endereco(), geo, req.telefoneWhatsapp(),
+                req.tituloEleitor(), req.zonaEleitoral(), req.secaoEleitoral(), req.observacoes()));
+    }
+
+    public record AtualizarEleitorRequest(
+            @NotBlank String nomeCompleto,
+            String endereco,
+            GeoLocalizacaoRequest geolocalizacao,
+            String telefoneWhatsapp,
+            @NotBlank String tituloEleitor,
+            String zonaEleitoral,
+            String secaoEleitoral,
+            String observacoes
+    ) {}
 
     /**
      * Contagem agregada sem PII — usado pelo dashboard e para provar que

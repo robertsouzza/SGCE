@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
@@ -9,11 +9,7 @@ import { OfflineStore, OutboxItem, EleitorLocal } from '../../core/offline/offli
 import { SyncService } from '../../core/offline/sync.service';
 import { GeolocationService } from '../../shared/geolocation/geolocation.service';
 import { AuthService } from '../../core/auth/auth.service';
-import {
-  CadastrarEleitorPayload,
-  Eleitor,
-  EleitorService,
-} from './eleitor.service';
+import { CadastrarEleitorPayload, Eleitor, EleitorService } from './eleitor.service';
 
 interface LinhaEleitor {
   origem: 'servidor' | 'local';
@@ -21,16 +17,21 @@ interface LinhaEleitor {
   nomeCompleto: string;
   tituloEleitor: string;
   telefoneWhatsapp: string | null;
+  anonimizado: boolean;
   status?: OutboxItem['status'];
-  serverId?: number;
   clientId?: string;
+}
+
+interface Filtros {
+  nome: string;
+  titulo: string;
+  status: 'ativos' | 'anonimizados' | 'pendentes' | 'todos';
 }
 
 /**
  * Lista + cadastro offline-first de eleitores (RF-12, RF-13, RNF-01).
  * O submit grava sempre em IndexedDB primeiro (via OfflineStore) e enfileira
- * no outbox — o SyncService drena quando há conexão. UX mostra badges de
- * status por linha (pendente / sincronizado / erro).
+ * no outbox — o SyncService drena quando há conexão.
  */
 @Component({
   selector: 'sgce-eleitores',
@@ -42,34 +43,59 @@ interface LinhaEleitor {
         <h2>Eleitores da minha região</h2>
         <div class="acoes-topo">
           @if (temPendencias()) {
-            <button (click)="sincronizarAgora()">Sincronizar agora ({{ pendentesCount() }})</button>
+            <button class="btn" (click)="sincronizarAgora()">Sincronizar agora ({{ pendentesCount() }})</button>
           }
-          <button class="primary" (click)="abrirNovo()">+ Novo eleitor</button>
+          <button class="btn primary" (click)="abrirNovo()">+ Novo eleitor</button>
         </div>
       </header>
 
-      @if (erro()) {
-        <div class="erro">{{ erro() }}</div>
-      }
+      <section class="filtros card">
+        <div class="grid">
+          <label>Nome
+            <input type="text" [ngModel]="filtros().nome" (ngModelChange)="alterarFiltro('nome', $event)" placeholder="Pesquisar por nome" />
+          </label>
+          <label>Título
+            <input type="text" [ngModel]="filtros().titulo" (ngModelChange)="alterarFiltro('titulo', $event)" placeholder="Pesquisar por título" />
+          </label>
+          <label>Status
+            <select [ngModel]="filtros().status" (ngModelChange)="alterarFiltro('status', $event)">
+              <option value="ativos">Somente ativos</option>
+              <option value="anonimizados">Somente anonimizados</option>
+              <option value="pendentes">Com sincronização pendente</option>
+              <option value="todos">Todos</option>
+            </select>
+          </label>
+        </div>
+        <button type="button" class="btn ghost" (click)="limparFiltros()">Limpar filtros</button>
+      </section>
 
-      <table>
+      <div class="resumo">
+        Mostrando <strong>{{ paginaAtualItens().length }}</strong> de {{ filtrados().length }}
+        (total local + servidor: {{ todasLinhas().length }})
+      </div>
+
+      @if (erro()) { <div class="erro">{{ erro() }}</div> }
+
+      <table class="lista">
         <thead>
-          <tr>
-            <th>Nome</th>
-            <th>Título</th>
-            <th>WhatsApp</th>
-            <th>Status</th>
-            <th>Ações</th>
-          </tr>
+          <tr><th>Nome</th><th>Título</th><th>WhatsApp</th><th>Status</th><th>Ações</th></tr>
         </thead>
         <tbody>
-          @for (linha of linhas(); track linha.id) {
-            <tr [class.local]="linha.origem === 'local'">
-              <td>{{ linha.nomeCompleto }}</td>
+          @for (linha of paginaAtualItens(); track linha.id) {
+            <tr [class.local]="linha.origem === 'local'" [class.inativo]="linha.anonimizado">
+              <td>
+                @if (linha.anonimizado) {
+                  <em>{{ linha.nomeCompleto }}</em>
+                } @else {
+                  {{ linha.nomeCompleto }}
+                }
+              </td>
               <td>{{ linha.tituloEleitor }}</td>
               <td>{{ linha.telefoneWhatsapp || '—' }}</td>
               <td>
-                @if (linha.origem === 'servidor') {
+                @if (linha.anonimizado) {
+                  <span class="badge off">anonimizado</span>
+                } @else if (linha.origem === 'servidor') {
                   <span class="badge ok">sincronizado</span>
                 } @else if (linha.status === 'PENDING' || linha.status === 'SENT') {
                   <span class="badge pend">pendente</span>
@@ -81,39 +107,44 @@ interface LinhaEleitor {
                   <span class="badge ok">confirmado</span>
                 }
               </td>
-              <td>
+              <td class="acoes">
                 @if (linha.origem === 'servidor') {
-                  <a [routerLink]="['/eleitores', linha.id]">Abrir</a>
+                  <a [routerLink]="['/eleitores', linha.id]" class="btn">Abrir</a>
+                  @if (!linha.anonimizado) {
+                    <a [routerLink]="['/eleitores', linha.id, 'editar']" class="btn">Editar</a>
+                  }
                 }
               </td>
             </tr>
           } @empty {
-            <tr>
-              <td colspan="5" class="vazio">Nenhum eleitor cadastrado ainda.</td>
-            </tr>
+            <tr><td colspan="5" class="vazio">Nenhum eleitor encontrado com os filtros atuais.</td></tr>
           }
         </tbody>
       </table>
+
+      @if (totalPaginas() > 1) {
+        <nav class="paginacao">
+          <button (click)="mudarPagina(pagina() - 1)" [disabled]="pagina() === 1">← Anterior</button>
+          <span>Página {{ pagina() }} de {{ totalPaginas() }}</span>
+          <button (click)="mudarPagina(pagina() + 1)" [disabled]="pagina() === totalPaginas()">Próxima →</button>
+        </nav>
+      }
 
       @if (mostrandoNovo()) {
         <div class="modal-back" (click)="fecharNovo()">
           <div class="modal" (click)="$event.stopPropagation()">
             <h3>Novo eleitor</h3>
             <form (submit)="submeter($event)">
-              <label>
-                Nome completo *
+              <label>Nome completo *
                 <input type="text" [(ngModel)]="form.nomeCompleto" name="nomeCompleto" required />
               </label>
-              <label>
-                Título de eleitor *
+              <label>Título de eleitor *
                 <input type="text" [(ngModel)]="form.tituloEleitor" name="tituloEleitor" required />
               </label>
-              <label>
-                WhatsApp
+              <label>WhatsApp
                 <input type="tel" [(ngModel)]="form.telefoneWhatsapp" name="telefoneWhatsapp" placeholder="+5511999999999" />
               </label>
-              <label>
-                Endereço
+              <label>Endereço
                 <input type="text" [(ngModel)]="form.endereco" name="endereco" />
               </label>
               <label class="row">
@@ -123,9 +154,9 @@ interface LinhaEleitor {
               @if (geoCapturada()) {
                 <small>Geo: {{ geoCapturada()?.latitude?.toFixed(5) }}, {{ geoCapturada()?.longitude?.toFixed(5) }}</small>
               }
-              <div class="acoes">
-                <button type="button" (click)="fecharNovo()">Cancelar</button>
-                <button type="submit" class="primary" [disabled]="submetendo()">
+              <div class="acoes-form">
+                <button type="button" class="btn ghost" (click)="fecharNovo()">Cancelar</button>
+                <button type="submit" class="btn primary" [disabled]="submetendo()">
                   {{ submetendo() ? 'Salvando...' : 'Salvar (offline-first)' }}
                 </button>
               </div>
@@ -139,26 +170,38 @@ interface LinhaEleitor {
     `
       .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
       .acoes-topo { display: flex; gap: 8px; }
-      table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 6px; overflow: hidden; }
-      th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #e2e8f0; }
-      th { background: #f1f5f9; font-size: 13px; color: #475569; }
+      .filtros.card { background: #fff; padding: 14px; border-radius: 6px; margin-bottom: 10px; }
+      .filtros .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 8px; }
+      .filtros label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: #475569; }
+      .filtros input, .filtros select { padding: 6px 8px; border: 1px solid #cbd5e1; border-radius: 4px; }
+      .resumo { color: #64748b; font-size: 13px; margin-bottom: 8px; }
+      table.lista { width: 100%; background: #fff; border-collapse: collapse; border-radius: 6px; overflow: hidden; }
+      table.lista th, table.lista td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 13px; }
+      table.lista th { background: #f1f5f9; color: #475569; }
       tr.local td { background: #fefce8; }
+      tr.inativo td { opacity: 0.55; font-style: italic; }
       .vazio { color: #94a3b8; text-align: center; padding: 24px; }
-      .badge { padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+      .badge { padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
       .badge.ok { background: #dcfce7; color: #166534; }
       .badge.pend { background: #fef3c7; color: #92400e; }
       .badge.conflict { background: #fecaca; color: #991b1b; }
       .badge.err { background: #fee2e2; color: #991b1b; }
-      button { padding: 8px 16px; border-radius: 4px; border: 1px solid #cbd5e1; background: #f1f5f9; cursor: pointer; }
-      button.primary { background: #2563eb; color: #fff; border-color: #2563eb; }
-      button:disabled { opacity: 0.6; cursor: not-allowed; }
+      .badge.off { background: #f1f5f9; color: #64748b; }
+      .acoes { display: flex; gap: 4px; }
+      .btn { padding: 4px 10px; border-radius: 4px; border: 1px solid #cbd5e1; background: #f1f5f9; cursor: pointer; font-size: 12px; text-decoration: none; color: #1e293b; display: inline-block; }
+      .btn.primary { background: #2563eb; color: #fff; border-color: #2563eb; }
+      .btn.ghost { background: transparent; color: #475569; }
+      .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+      .paginacao { display: flex; gap: 8px; justify-content: center; align-items: center; margin-top: 10px; font-size: 13px; }
+      .paginacao button { padding: 4px 10px; border: 1px solid #cbd5e1; background: #fff; border-radius: 4px; cursor: pointer; }
+      .paginacao button:disabled { opacity: 0.4; cursor: not-allowed; }
       .modal-back { position: fixed; inset: 0; background: rgba(15,23,42,0.55); display: flex; align-items: center; justify-content: center; z-index: 100; }
       .modal { background: #fff; padding: 24px; border-radius: 8px; width: 460px; max-width: calc(100vw - 32px); }
       .modal h3 { margin-top: 0; }
       form label { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; font-size: 14px; color: #334155; }
       form label input[type="text"], form label input[type="tel"] { padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px; }
       form label.row { flex-direction: row; align-items: center; gap: 8px; }
-      .acoes { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+      .acoes-form { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
       .erro { background: #fee2e2; color: #991b1b; padding: 10px; border-radius: 4px; margin-bottom: 12px; }
       small { color: #64748b; }
     `,
@@ -179,15 +222,34 @@ export class EleitoresComponent implements OnInit, OnDestroy {
   submetendo = signal(false);
   capturarGeoloc = true;
   geoCapturada = signal<{ latitude: number; longitude: number } | null>(null);
-  form = {
-    nomeCompleto: '',
-    tituloEleitor: '',
-    telefoneWhatsapp: '',
-    endereco: '',
-  };
+  form = { nomeCompleto: '', tituloEleitor: '', telefoneWhatsapp: '', endereco: '' };
+
+  filtros = signal<Filtros>({ nome: '', titulo: '', status: 'ativos' });
+  pagina = signal(1);
+  private readonly TAM = 15;
+
   private timerSync?: ReturnType<typeof setInterval>;
 
-  linhas = () => this.combinarLinhas();
+  todasLinhas = computed<LinhaEleitor[]>(() => this.combinarLinhas());
+
+  filtrados = computed<LinhaEleitor[]>(() => {
+    const f = this.filtros();
+    return this.todasLinhas().filter(l => {
+      if (f.status === 'ativos' && (l.anonimizado || l.origem === 'local')) return false;
+      if (f.status === 'anonimizados' && !l.anonimizado) return false;
+      if (f.status === 'pendentes' && !(l.origem === 'local' && (l.status === 'PENDING' || l.status === 'SENT' || l.status === 'CONFLICT' || l.status === 'ERROR'))) return false;
+      if (f.nome && !l.nomeCompleto.toLowerCase().includes(f.nome.toLowerCase())) return false;
+      if (f.titulo && !l.tituloEleitor.toLowerCase().includes(f.titulo.toLowerCase())) return false;
+      return true;
+    });
+  });
+
+  totalPaginas = computed(() => Math.max(1, Math.ceil(this.filtrados().length / this.TAM)));
+  paginaAtualItens = computed(() => {
+    const i = (this.pagina() - 1) * this.TAM;
+    return this.filtrados().slice(i, i + this.TAM);
+  });
+
   temPendencias = () => this.outbox().some(o => o.status === 'PENDING' || o.status === 'SENT');
   pendentesCount = () => this.outbox().filter(o => o.status === 'PENDING' || o.status === 'SENT').length;
 
@@ -204,6 +266,19 @@ export class EleitoresComponent implements OnInit, OnDestroy {
 
   private aoVoltarOnline = () => this.tentarDrenagem();
 
+  alterarFiltro<K extends keyof Filtros>(campo: K, valor: Filtros[K]): void {
+    this.filtros.update(f => ({ ...f, [campo]: valor }));
+    this.pagina.set(1);
+  }
+  limparFiltros(): void {
+    this.filtros.set({ nome: '', titulo: '', status: 'ativos' });
+    this.pagina.set(1);
+  }
+  mudarPagina(p: number): void {
+    if (p < 1 || p > this.totalPaginas()) return;
+    this.pagina.set(p);
+  }
+
   async abrirNovo(): Promise<void> {
     this.mostrandoNovo.set(true);
     this.form = { nomeCompleto: '', tituloEleitor: '', telefoneWhatsapp: '', endereco: '' };
@@ -213,10 +288,7 @@ export class EleitoresComponent implements OnInit, OnDestroy {
       this.geoCapturada.set(g);
     }
   }
-
-  fecharNovo(): void {
-    this.mostrandoNovo.set(false);
-  }
+  fecharNovo(): void { this.mostrandoNovo.set(false); }
 
   async submeter(e: Event): Promise<void> {
     e.preventDefault();
@@ -248,7 +320,6 @@ export class EleitoresComponent implements OnInit, OnDestroy {
       });
       this.mostrandoNovo.set(false);
       await this.recarregar();
-      // Dispara sync sem bloquear UI
       this.tentarDrenagem();
     } catch (err) {
       this.erro.set('Falha ao salvar localmente: ' + (err as Error).message);
@@ -257,17 +328,13 @@ export class EleitoresComponent implements OnInit, OnDestroy {
     }
   }
 
-  async sincronizarAgora(): Promise<void> {
-    await this.tentarDrenagem();
-  }
+  async sincronizarAgora(): Promise<void> { await this.tentarDrenagem(); }
 
   private async tentarDrenagem(): Promise<void> {
     try {
       const n = await this.sync.drenar();
       if (n > 0) await this.recarregar();
-    } catch {
-      /* silencioso */
-    }
+    } catch { /* silencioso */ }
   }
 
   private async recarregar(): Promise<void> {
@@ -276,9 +343,7 @@ export class EleitoresComponent implements OnInit, OnDestroy {
         const remotos = await firstValueFrom(this.eleitorSvc.listar());
         this.linhasServidor.set(remotos ?? []);
       }
-    } catch {
-      /* offline ou sem permissão */
-    }
+    } catch { /* offline ou sem permissão */ }
     this.linhasLocais.set(await this.store.eleitores_locais.toArray());
     this.outbox.set(await this.store.outbox.toArray());
   }
@@ -290,25 +355,25 @@ export class EleitoresComponent implements OnInit, OnDestroy {
       nomeCompleto: e.anonimizado ? `Eleitor anonimizado #${e.id}` : e.nomeCompleto,
       tituloEleitor: e.tituloEleitor,
       telefoneWhatsapp: e.telefoneWhatsapp,
+      anonimizado: !!e.anonimizado,
     }));
     const outboxPorCliente = new Map(this.outbox().map(o => [o.clientOpId, o]));
     const locais: LinhaEleitor[] = this.linhasLocais()
       .filter(l => !l.serverId)
       .map(l => {
         const ob = outboxPorCliente.get(l.clientId);
+        const p = l.payload as CadastrarEleitorPayload;
         return {
           origem: 'local' as const,
           id: 'local-' + l.clientId,
-          nomeCompleto: l.tituloEleitor === (l.payload as CadastrarEleitorPayload)?.tituloEleitor
-            ? (l.payload as CadastrarEleitorPayload).nomeCompleto
-            : l.tituloEleitor,
+          nomeCompleto: p?.nomeCompleto ?? l.tituloEleitor,
           tituloEleitor: l.tituloEleitor,
-          telefoneWhatsapp: (l.payload as CadastrarEleitorPayload)?.telefoneWhatsapp ?? null,
+          telefoneWhatsapp: p?.telefoneWhatsapp ?? null,
+          anonimizado: false,
           status: ob?.status,
           clientId: l.clientId,
         };
       });
     return [...locais, ...remoto];
   }
-
 }

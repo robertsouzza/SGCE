@@ -123,6 +123,10 @@ export class EleitorService {
     return this.http.post<Eleitor>(`/api/eleitores/${eleitorId}/anonimizar`, {});
   }
 
+  atualizar(id: number, payload: CadastrarEleitorPayload): Observable<Eleitor> {
+    return this.http.put<Eleitor>(`/api/eleitores/${id}`, payload);
+  }
+
   gerarDeepLink(abordagemId: number, candidatoId: number): Observable<DeepLinkOptIn> {
     return this.http.get<DeepLinkOptIn>('/api/consentimentos/deep-link-opt-in', {
       params: { abordagemId, candidatoId },

@@ -90,6 +90,11 @@ export const routes: Routes = [
         loadComponent: () => import('./features/eleitor/eleitor-detalhe.component').then(m => m.EleitorDetalheComponent),
       },
       {
+        path: 'eleitores/:id/editar',
+        canActivate: [roleGuard('ADMIN', 'LIDER_EQUIPE', 'MEMBRO_EQUIPE')],
+        loadComponent: () => import('./features/eleitor/eleitor-editar.component').then(m => m.EleitorEditarComponent),
+      },
+      {
         path: 'mapa',
         canActivate: [roleGuard('ADMIN', 'LIDER_EQUIPE', 'MEMBRO_EQUIPE', 'CANDIDATO', 'SUPER_ADMIN_PLATAFORMA')],
         loadComponent: () => import('./features/mapa/mapa.component').then(m => m.MapaComponent),

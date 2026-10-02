@@ -117,6 +117,41 @@ public class EleitoresService implements EleitoresUseCases {
         return eleitorRepo.contarPorRegiao(regiaoId);
     }
 
+    @Transactional
+    @Auditavel(acao = "atualizar_eleitor", entidade = "Eleitor")
+    public Eleitor atualizarEleitor(Long eleitorId, AtualizarEleitorCommand cmd) {
+        Long tenant = tenantObrigatorio();
+        Eleitor atual = eleitorRepo.findById(eleitorId)
+                .orElseThrow(() -> new IllegalArgumentException("eleitor não encontrado: " + eleitorId));
+        if (!tenant.equals(atual.partidoId())) {
+            throw new AccessDeniedException(
+                    "usuário do partido " + tenant + " não pode alterar eleitor do partido " + atual.partidoId());
+        }
+        if (atual.anonimizado()) {
+            throw new IllegalStateException("eleitor anonimizado não pode ser editado");
+        }
+        Eleitor atualizado = new Eleitor(
+                atual.id(), atual.partidoId(),
+                cmd.nomeCompleto(), cmd.endereco(), cmd.geolocalizacao(),
+                cmd.telefoneWhatsapp(), cmd.tituloEleitor(), atual.tituloEleitorHash(),
+                cmd.zonaEleitoral(), cmd.secaoEleitoral(), cmd.observacoes(),
+                false, null,
+                atual.criadoEm(), Instant.now()
+        );
+        return eleitorRepo.save(atualizado);
+    }
+
+    public record AtualizarEleitorCommand(
+            String nomeCompleto,
+            String endereco,
+            Ponto geolocalizacao,
+            String telefoneWhatsapp,
+            String tituloEleitor,
+            String zonaEleitoral,
+            String secaoEleitoral,
+            String observacoes
+    ) {}
+
     private Long tenantObrigatorio() {
         Long t = TenantContext.get();
         if (t == null) {
