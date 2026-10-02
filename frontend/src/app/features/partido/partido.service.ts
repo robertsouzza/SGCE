@@ -86,7 +86,11 @@ export interface CriarPartidoInput {
   sigla: string;
   numeroPartido: number;
   cnpj: string;
+  enderecoSede?: string;
+  dadosBancariosContaPartidaria?: string;
+  email?: string;
   telefone?: string;
+  planoAssinatura?: string;
 }
 
 export interface CriarCandidatoInput {
@@ -115,8 +119,20 @@ export class PartidoService {
   listar(): Observable<Partido[]> {
     return this.http.get<Partido[]>('/api/partidos');
   }
+  buscar(id: number): Observable<Partido> {
+    return this.http.get<Partido>(`/api/partidos/${id}`);
+  }
   criar(input: CriarPartidoInput): Observable<Partido> {
     return this.http.post<Partido>('/api/partidos', input);
+  }
+  atualizar(id: number, input: CriarPartidoInput): Observable<Partido> {
+    return this.http.put<Partido>(`/api/partidos/${id}`, input);
+  }
+  inativar(id: number): Observable<Partido> {
+    return this.http.post<Partido>(`/api/partidos/${id}/inativar`, {});
+  }
+  reativar(id: number): Observable<Partido> {
+    return this.http.post<Partido>(`/api/partidos/${id}/reativar`, {});
   }
 
   listarCandidatos(): Observable<Candidato[]> {

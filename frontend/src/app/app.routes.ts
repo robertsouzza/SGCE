@@ -20,6 +20,16 @@ export const routes: Routes = [
         loadComponent: () => import('./features/partido/partidos.component').then(m => m.PartidosComponent),
       },
       {
+        path: 'partidos/novo',
+        canActivate: [roleGuard('SUPER_ADMIN_PLATAFORMA')],
+        loadComponent: () => import('./features/partido/partido-novo.component').then(m => m.PartidoNovoComponent),
+      },
+      {
+        path: 'partidos/:id/editar',
+        canActivate: [roleGuard('SUPER_ADMIN_PLATAFORMA')],
+        loadComponent: () => import('./features/partido/partido-editar.component').then(m => m.PartidoEditarComponent),
+      },
+      {
         path: 'candidatos',
         canActivate: [roleGuard('ADMIN', 'SUPER_ADMIN_PLATAFORMA')],
         loadComponent: () => import('./features/partido/candidatos.component').then(m => m.CandidatosComponent),
