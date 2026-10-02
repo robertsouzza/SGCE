@@ -2,6 +2,7 @@ package com.campanha.financeiro.infrastructure.adapter.in.web;
 
 import com.campanha.autenticacao.domain.AuthenticatedUser;
 import com.campanha.financeiro.application.port.in.FinanceiroUseCases;
+import com.campanha.financeiro.application.service.FinanceiroService;
 import com.campanha.financeiro.domain.CategoriaDespesa;
 import com.campanha.financeiro.domain.Despesa;
 import jakarta.validation.Valid;
@@ -28,6 +29,7 @@ import java.util.Map;
 public class DespesaController {
 
     private final FinanceiroUseCases uc;
+    private final FinanceiroService service;
 
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN','GERENTE_FINANCEIRO','SECRETARIO')")
@@ -44,6 +46,14 @@ public class DespesaController {
     @PreAuthorize("hasAnyRole('ADMIN','GERENTE_FINANCEIRO','SECRETARIO','CANDIDATO')")
     public List<Despesa> listar() {
         return uc.listarDespesas();
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','GERENTE_FINANCEIRO','SECRETARIO','CANDIDATO')")
+    public ResponseEntity<Despesa> buscarPorId(@PathVariable Long id) {
+        return service.buscarDespesa(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PatchMapping("/{id}/aprovar")

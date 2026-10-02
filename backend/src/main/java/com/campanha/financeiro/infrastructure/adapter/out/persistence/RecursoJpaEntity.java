@@ -37,6 +37,8 @@ public class RecursoJpaEntity {
     @Column(name = "comprovante_url")
     private String comprovanteUrl;
 
+    @Column(nullable = false) private boolean ativo;
+
     @Column(name = "criado_em", nullable = false)
     private Instant criadoEm;
 }

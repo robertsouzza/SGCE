@@ -14,6 +14,16 @@ export interface Recurso {
   dataRepasse: string;
   origem?: string;
   numeroDocumento?: string;
+  ativo: boolean;
+}
+
+export interface RecursoInput {
+  candidatoId: number;
+  tipoRecurso: TipoRecurso;
+  valor: number;
+  dataRepasse: string;
+  origem?: string;
+  numeroDocumento?: string;
 }
 export interface Despesa {
   id: number;
@@ -41,9 +51,16 @@ export class FinanceiroService {
   private http = inject(HttpClient);
 
   listarRecursos(): Observable<Recurso[]> { return this.http.get<Recurso[]>('/api/recursos'); }
-  criarRecurso(input: Omit<Recurso, 'id'>): Observable<Recurso> { return this.http.post<Recurso>('/api/recursos', input); }
+  buscarRecurso(id: number): Observable<Recurso> { return this.http.get<Recurso>(`/api/recursos/${id}`); }
+  criarRecurso(input: RecursoInput): Observable<Recurso> { return this.http.post<Recurso>('/api/recursos', input); }
+  atualizarRecurso(id: number, input: RecursoInput): Observable<Recurso> {
+    return this.http.put<Recurso>(`/api/recursos/${id}`, input);
+  }
+  inativarRecurso(id: number): Observable<Recurso> { return this.http.post<Recurso>(`/api/recursos/${id}/inativar`, {}); }
+  reativarRecurso(id: number): Observable<Recurso> { return this.http.post<Recurso>(`/api/recursos/${id}/reativar`, {}); }
 
   listarDespesas(): Observable<Despesa[]> { return this.http.get<Despesa[]>('/api/despesas'); }
+  buscarDespesa(id: number): Observable<Despesa> { return this.http.get<Despesa>(`/api/despesas/${id}`); }
   criarDespesa(input: { candidatoId: number; categoria: CategoriaDespesa; valor: number; data: string; descricao?: string }): Observable<Despesa> {
     return this.http.post<Despesa>('/api/despesas', input);
   }

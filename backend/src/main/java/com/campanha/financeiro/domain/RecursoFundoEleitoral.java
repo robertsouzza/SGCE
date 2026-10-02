@@ -14,6 +14,7 @@ public record RecursoFundoEleitoral(
         String origem,
         String numeroDocumento,
         String comprovanteUrl,
+        boolean ativo,
         Instant criadoEm
 ) {
     public RecursoFundoEleitoral {
@@ -29,5 +30,11 @@ public record RecursoFundoEleitoral(
         if (dataRepasse == null) {
             throw new IllegalArgumentException("dataRepasse é obrigatória");
         }
+    }
+
+    public RecursoFundoEleitoral comAtivo(boolean novoAtivo) {
+        return new RecursoFundoEleitoral(id, partidoId, candidatoId, tipoRecurso,
+                valor, dataRepasse, origem, numeroDocumento, comprovanteUrl,
+                novoAtivo, criadoEm);
     }
 }

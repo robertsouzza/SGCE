@@ -10,6 +10,7 @@ import com.campanha.financeiro.domain.Despesa;
 import com.campanha.financeiro.domain.PagamentoEquipe;
 import com.campanha.financeiro.domain.RecursoFundoEleitoral;
 import com.campanha.financeiro.domain.StatusDespesa;
+import com.campanha.financeiro.domain.TipoRecurso;
 import com.campanha.shared.multitenancy.TenantContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
@@ -42,8 +43,61 @@ public class FinanceiroService implements FinanceiroUseCases {
         return recursoRepo.save(new RecursoFundoEleitoral(
                 null, partidoId, cmd.candidatoId(),
                 cmd.tipoRecurso(), cmd.valor(), cmd.dataRepasse(),
-                cmd.origem(), cmd.numeroDocumento(), null, Instant.now()));
+                cmd.origem(), cmd.numeroDocumento(), null, true, Instant.now()));
     }
+
+    @Transactional
+    @Auditavel(acao = "alterar_ativo_recurso", entidade = "RecursoFundoEleitoral")
+    public RecursoFundoEleitoral alterarAtivoRecurso(Long recursoId, boolean ativo) {
+        RecursoFundoEleitoral atual = recursoRepo.findById(recursoId)
+                .orElseThrow(() -> new IllegalArgumentException("recurso não encontrado: " + recursoId));
+        Long tenant = tenantObrigatorio();
+        if (!tenant.equals(atual.partidoId())) {
+            throw new org.springframework.security.access.AccessDeniedException(
+                    "usuário do partido " + tenant + " não pode alterar recurso do partido " + atual.partidoId());
+        }
+        if (atual.ativo() == ativo) {
+            return atual;
+        }
+        return recursoRepo.save(atual.comAtivo(ativo));
+    }
+
+    @Transactional
+    @Auditavel(acao = "atualizar_recurso", entidade = "RecursoFundoEleitoral")
+    public RecursoFundoEleitoral atualizarRecurso(Long recursoId, AtualizarRecursoCommand cmd) {
+        RecursoFundoEleitoral atual = recursoRepo.findById(recursoId)
+                .orElseThrow(() -> new IllegalArgumentException("recurso não encontrado: " + recursoId));
+        Long tenant = tenantObrigatorio();
+        if (!tenant.equals(atual.partidoId())) {
+            throw new org.springframework.security.access.AccessDeniedException(
+                    "usuário do partido " + tenant + " não pode alterar recurso do partido " + atual.partidoId());
+        }
+        RecursoFundoEleitoral atualizado = new RecursoFundoEleitoral(
+                atual.id(), atual.partidoId(), atual.candidatoId(),
+                cmd.tipoRecurso(), cmd.valor(), cmd.dataRepasse(),
+                cmd.origem(), cmd.numeroDocumento(), atual.comprovanteUrl(),
+                atual.ativo(), atual.criadoEm()
+        );
+        return recursoRepo.save(atualizado);
+    }
+
+    @Transactional(readOnly = true)
+    public java.util.Optional<RecursoFundoEleitoral> buscarRecurso(Long id) {
+        return recursoRepo.findById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public java.util.Optional<Despesa> buscarDespesa(Long id) {
+        return despesaRepo.findById(id);
+    }
+
+    public record AtualizarRecursoCommand(
+            TipoRecurso tipoRecurso,
+            java.math.BigDecimal valor,
+            java.time.LocalDate dataRepasse,
+            String origem,
+            String numeroDocumento
+    ) {}
 
     @Override
     @Transactional

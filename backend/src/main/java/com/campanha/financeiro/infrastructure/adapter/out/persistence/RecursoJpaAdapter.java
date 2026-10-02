@@ -21,7 +21,9 @@ public class RecursoJpaAdapter implements RecursoRepositoryPort {
                 .id(r.id()).partidoId(r.partidoId()).candidatoId(r.candidatoId())
                 .tipoRecurso(r.tipoRecurso()).valor(r.valor()).dataRepasse(r.dataRepasse())
                 .origem(r.origem()).numeroDocumento(r.numeroDocumento())
-                .comprovanteUrl(r.comprovanteUrl()).criadoEm(r.criadoEm())
+                .comprovanteUrl(r.comprovanteUrl())
+                .ativo(r.ativo())
+                .criadoEm(r.criadoEm())
                 .build();
         return toDomain(repo.save(e));
     }
@@ -51,6 +53,6 @@ public class RecursoJpaAdapter implements RecursoRepositoryPort {
                 e.getId(), e.getPartidoId(), e.getCandidatoId(),
                 e.getTipoRecurso(), e.getValor(), e.getDataRepasse(),
                 e.getOrigem(), e.getNumeroDocumento(),
-                e.getComprovanteUrl(), e.getCriadoEm());
+                e.getComprovanteUrl(), e.isAtivo(), e.getCriadoEm());
     }
 }

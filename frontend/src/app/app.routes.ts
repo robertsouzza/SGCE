@@ -65,6 +65,21 @@ export const routes: Routes = [
         loadComponent: () => import('./features/financeiro/financeiro.component').then(m => m.FinanceiroComponent),
       },
       {
+        path: 'financeiro/recursos/novo',
+        canActivate: [roleGuard('ADMIN', 'GERENTE_FINANCEIRO', 'SECRETARIO')],
+        loadComponent: () => import('./features/financeiro/recurso-novo.component').then(m => m.RecursoNovoComponent),
+      },
+      {
+        path: 'financeiro/recursos/:id/editar',
+        canActivate: [roleGuard('ADMIN', 'GERENTE_FINANCEIRO', 'SECRETARIO')],
+        loadComponent: () => import('./features/financeiro/recurso-editar.component').then(m => m.RecursoEditarComponent),
+      },
+      {
+        path: 'financeiro/despesas/nova',
+        canActivate: [roleGuard('ADMIN', 'GERENTE_FINANCEIRO', 'SECRETARIO')],
+        loadComponent: () => import('./features/financeiro/despesa-nova.component').then(m => m.DespesaNovaComponent),
+      },
+      {
         path: 'eleitores',
         canActivate: [roleGuard('ADMIN', 'LIDER_EQUIPE', 'MEMBRO_EQUIPE', 'CANDIDATO')],
         loadComponent: () => import('./features/eleitor/eleitores.component').then(m => m.EleitoresComponent),
