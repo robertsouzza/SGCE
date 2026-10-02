@@ -17,5 +17,6 @@ public class EquipeJpaEntity {
     @Column(nullable = false) private String nome;
     @Column(name = "lider_id", nullable = false) private Long liderId;
     @Column(name = "regiao_atuacao") private String regiaoAtuacao;
+    @Column(nullable = false) private boolean ativo;
     @Column(name = "criado_em", nullable = false) private Instant criadoEm;
 }

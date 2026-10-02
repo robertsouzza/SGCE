@@ -8,7 +8,14 @@ export interface Equipe {
   nome: string;
   liderId: number;
   regiaoAtuacao?: string;
+  ativo: boolean;
   criadoEm: string;
+}
+
+export interface AtualizarEquipeInput {
+  nome: string;
+  liderId: number;
+  regiaoAtuacao?: string;
 }
 
 export interface MembroEquipe {
@@ -34,8 +41,20 @@ export class EquipeService {
   listar(): Observable<Equipe[]> {
     return this.http.get<Equipe[]>('/api/equipes');
   }
+  buscar(id: number): Observable<Equipe> {
+    return this.http.get<Equipe>(`/api/equipes/${id}`);
+  }
   criar(input: { partidoId?: number; nome: string; liderId: number; regiaoAtuacao?: string }): Observable<Equipe> {
     return this.http.post<Equipe>('/api/equipes', input);
+  }
+  atualizar(id: number, input: AtualizarEquipeInput): Observable<Equipe> {
+    return this.http.put<Equipe>(`/api/equipes/${id}`, input);
+  }
+  inativar(id: number): Observable<Equipe> {
+    return this.http.post<Equipe>(`/api/equipes/${id}/inativar`, {});
+  }
+  reativar(id: number): Observable<Equipe> {
+    return this.http.post<Equipe>(`/api/equipes/${id}/reativar`, {});
   }
   adicionarMembro(equipeId: number, input: { usuarioId: number; funcao?: string }): Observable<MembroEquipe> {
     return this.http.post<MembroEquipe>(`/api/equipes/${equipeId}/membros`, input);

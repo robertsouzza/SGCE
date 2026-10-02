@@ -1,6 +1,7 @@
 package com.campanha.equipe.infrastructure.adapter.in.web;
 
 import com.campanha.equipe.application.port.in.EquipeUseCases;
+import com.campanha.equipe.application.service.EquipeService;
 import com.campanha.equipe.domain.Equipe;
 import com.campanha.equipe.domain.EquipeCandidato;
 import com.campanha.equipe.domain.MembroEquipe;
@@ -22,6 +23,7 @@ import java.util.List;
 public class EquipeController {
 
     private final EquipeUseCases uc;
+    private final EquipeService service;
 
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN_PLATAFORMA')")
@@ -35,6 +37,33 @@ public class EquipeController {
     @PreAuthorize("isAuthenticated()")
     public List<Equipe> listar() {
         return uc.listarEquipes();
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Equipe> buscarPorId(@PathVariable Long id) {
+        return service.buscarPorId(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN_PLATAFORMA')")
+    public Equipe atualizar(@PathVariable Long id, @Valid @RequestBody AtualizarEquipeRequest req) {
+        return service.atualizar(id, new EquipeService.AtualizarEquipeCommand(
+                req.nome(), req.liderId(), req.regiaoAtuacao()));
+    }
+
+    @PostMapping("/{id}/inativar")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN_PLATAFORMA')")
+    public Equipe inativar(@PathVariable Long id) {
+        return service.alterarAtivo(id, false);
+    }
+
+    @PostMapping("/{id}/reativar")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN_PLATAFORMA')")
+    public Equipe reativar(@PathVariable Long id) {
+        return service.alterarAtivo(id, true);
     }
 
     @PostMapping("/{equipeId}/membros")
@@ -67,6 +96,7 @@ public class EquipeController {
     }
 
     public record CadastrarEquipeRequest(Long partidoId, @NotBlank String nome, @NotNull Long liderId, String regiaoAtuacao) {}
+    public record AtualizarEquipeRequest(@NotBlank String nome, @NotNull Long liderId, String regiaoAtuacao) {}
     public record AdicionarMembroRequest(@NotNull Long usuarioId, String funcao) {}
     public record VincularCandidatoRequest(@NotNull Long candidatoId, @NotNull LocalDate vigenteDesde, LocalDate vigenteAte) {}
 }

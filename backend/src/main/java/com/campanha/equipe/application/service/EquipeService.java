@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -26,8 +27,53 @@ public class EquipeService implements EquipeUseCases {
     @Auditavel(acao = "cadastrar_equipe", entidade = "Equipe")
     public Equipe cadastrarEquipe(CadastrarEquipeCommand cmd) {
         Long partido = resolvePartido(cmd.partidoId());
-        return repo.save(new Equipe(null, partido, cmd.nome(), cmd.liderId(), cmd.regiaoAtuacao(), Instant.now()));
+        return repo.save(new Equipe(null, partido, cmd.nome(), cmd.liderId(),
+                cmd.regiaoAtuacao(), true, Instant.now()));
     }
+
+    @Transactional(readOnly = true)
+    public Optional<Equipe> buscarPorId(Long id) {
+        return repo.findById(id);
+    }
+
+    @Transactional
+    @Auditavel(acao = "alterar_ativo_equipe", entidade = "Equipe")
+    public Equipe alterarAtivo(Long equipeId, boolean ativo) {
+        Equipe atual = repo.findById(equipeId)
+                .orElseThrow(() -> new IllegalArgumentException("equipe não encontrada: " + equipeId));
+        Long tenantAtual = TenantContext.get();
+        if (tenantAtual != null && !tenantAtual.equals(atual.partidoId())) {
+            throw new AccessDeniedException(
+                    "usuário do partido " + tenantAtual + " não pode alterar equipe do partido " + atual.partidoId());
+        }
+        if (atual.ativo() == ativo) {
+            return atual;
+        }
+        return repo.save(atual.comAtivo(ativo));
+    }
+
+    @Transactional
+    @Auditavel(acao = "atualizar_equipe", entidade = "Equipe")
+    public Equipe atualizar(Long equipeId, AtualizarEquipeCommand cmd) {
+        Equipe atual = repo.findById(equipeId)
+                .orElseThrow(() -> new IllegalArgumentException("equipe não encontrada: " + equipeId));
+        Long tenantAtual = TenantContext.get();
+        if (tenantAtual != null && !tenantAtual.equals(atual.partidoId())) {
+            throw new AccessDeniedException(
+                    "usuário do partido " + tenantAtual + " não pode alterar equipe do partido " + atual.partidoId());
+        }
+        Equipe atualizada = new Equipe(
+                atual.id(), atual.partidoId(), cmd.nome(), cmd.liderId(),
+                cmd.regiaoAtuacao(), atual.ativo(), atual.criadoEm()
+        );
+        return repo.save(atualizada);
+    }
+
+    public record AtualizarEquipeCommand(
+            String nome,
+            Long liderId,
+            String regiaoAtuacao
+    ) {}
 
     @Override
     @Transactional(readOnly = true)

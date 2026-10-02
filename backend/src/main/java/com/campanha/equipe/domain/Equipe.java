@@ -8,6 +8,7 @@ public record Equipe(
         String nome,
         Long liderId,
         String regiaoAtuacao,
+        boolean ativo,
         Instant criadoEm
 ) {
     public Equipe {
@@ -20,5 +21,9 @@ public record Equipe(
         if (liderId == null) {
             throw new IllegalArgumentException("equipe precisa ter um líder");
         }
+    }
+
+    public Equipe comAtivo(boolean novoAtivo) {
+        return new Equipe(id, partidoId, nome, liderId, regiaoAtuacao, novoAtivo, criadoEm);
     }
 }

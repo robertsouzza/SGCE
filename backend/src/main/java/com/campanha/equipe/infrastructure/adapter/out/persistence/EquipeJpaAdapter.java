@@ -23,6 +23,7 @@ public class EquipeJpaAdapter implements EquipeRepositoryPort {
         return toDomain(equipeRepo.save(EquipeJpaEntity.builder()
                 .id(e.id()).partidoId(e.partidoId()).nome(e.nome())
                 .liderId(e.liderId()).regiaoAtuacao(e.regiaoAtuacao())
+                .ativo(e.ativo())
                 .criadoEm(e.criadoEm()).build()));
     }
 
@@ -65,7 +66,8 @@ public class EquipeJpaAdapter implements EquipeRepositoryPort {
     }
 
     private static Equipe toDomain(EquipeJpaEntity e) {
-        return new Equipe(e.getId(), e.getPartidoId(), e.getNome(), e.getLiderId(), e.getRegiaoAtuacao(), e.getCriadoEm());
+        return new Equipe(e.getId(), e.getPartidoId(), e.getNome(), e.getLiderId(),
+                e.getRegiaoAtuacao(), e.isAtivo(), e.getCriadoEm());
     }
 
     private static MembroEquipe toDomain(MembroEquipeJpaEntity m) {
